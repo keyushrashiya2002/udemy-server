@@ -5,23 +5,26 @@ import ProductModel from "./model.js";
 
 class controller {
   static get = async (req, res) => {
-    const { minPrice, maxPrice, category } = req.query;
+    const { minPrice, maxPrice, category, title } = req.query;
     try {
       const { skip, limit } = paginationFun(req.query);
 
       let filter = {};
-      if (category) filter.category = category;
-      if (minPrice && maxPrice)
-        filter.price = {
-          $gte: minPrice,
-          $lt: maxPrice,
-        };
 
-      console.log(filter);
+      if (category) filter.category = category;
+      if (title) filter.title = new RegExp(title, "i");
+
+      if (minPrice || maxPrice) {
+        filter.price = {};
+        if (minPrice) filter.price.$gte = minPrice;
+        if (maxPrice) filter.price.$lt = maxPrice;
+      }
+
       const result = await ProductModel.find(filter)
         .skip(skip)
         .limit(limit)
-        .sort({ createdAt: -1 });
+        .sort({ createdAt: -1 })
+        .populate({ path: "category", select: "title" });
 
       const count = await ProductModel.countDocuments(filter);
 

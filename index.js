@@ -25,8 +25,9 @@ app.use(cors(corsOptions));
 connectDb(DATABASE_URL);
 
 // API Routes
-app.use(`/api/category`, route.categoryRoute);
+app.use(`/api/user`, route.userRoute);
 app.use(`/api/product`, route.productRoute);
+app.use(`/api/category`, route.categoryRoute);
 
 // Static
 app.use("/uploads", express.static(join(process.cwd(), "upload")));

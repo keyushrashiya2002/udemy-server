@@ -10,4 +10,4 @@ if (NODE_ENV === "development") {
   process.exit();
 }
 
-export const { PORT, DATABASE_URL, CLIENT_URL } = process.env;
+export const { PORT, DATABASE_URL, CLIENT_URL, JWT_SECRET_KEY } = process.env;
