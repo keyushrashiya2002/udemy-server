@@ -28,6 +28,7 @@ connectDb(DATABASE_URL);
 app.use(`/api/user`, route.userRoute);
 app.use(`/api/category`, route.categoryRoute);
 app.use(`/api/product`, route.productRoute);
+app.use(`/api/purchase`, route.purchaseRoute);
 app.use(`/api/cart`, route.cartRoute);
 
 // Static

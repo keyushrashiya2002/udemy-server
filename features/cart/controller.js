@@ -11,12 +11,7 @@ class controller {
         {
           $sort: { created: -1 },
         },
-        {
-          $skip: skip, // set your skip value here
-        },
-        {
-          $limit: limit, // set your limit value here
-        },
+
         {
           $lookup: {
             from: "products", // Name of the collection to join
@@ -30,6 +25,7 @@ class controller {
         },
         {
           $project: {
+            productId: "$product._id",
             title: "$product.title",
             price: "$product.price",
             quantity: 1,
@@ -37,20 +33,11 @@ class controller {
         },
       ]);
 
-      const count = await CartModel.countDocuments();
-
-      const pagination = paginationDetails({
-        limit: limit,
-        page: req.query.page,
-        totalItems: count,
-      });
-
       return successResponse({
         res,
         statusCode: 200,
         data: result,
         message: "Cart fetched successfully",
-        pagination,
       });
     } catch (error) {
       return errorResponse({
