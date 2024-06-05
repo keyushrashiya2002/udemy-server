@@ -18,6 +18,7 @@ const mongooseSchema = mongoose.Schema({
   },
 });
 
+mongooseSchema.index({ product: 1, user: 1 }, { unique: true });
 const CartModel = mongoose.model("Cart", mongooseSchema);
 
 export default CartModel;

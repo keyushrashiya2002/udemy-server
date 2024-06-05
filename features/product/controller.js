@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { errorResponse, successResponse } from "../../helper/apiResponse.js";
 import { paginationDetails, paginationFun } from "../../helper/common.js";
 
@@ -20,11 +21,53 @@ class controller {
         if (maxPrice) filter.price.$lt = maxPrice;
       }
 
-      const result = await ProductModel.find(filter)
-        .skip(skip)
-        .limit(limit)
-        .sort({ createdAt: -1 })
-        .populate({ path: "category", select: "title" });
+      const result = await ProductModel.aggregate([
+        { $match: filter },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: limit },
+        {
+          $lookup: {
+            from: "categories",
+            localField: "category",
+            foreignField: "_id",
+            as: "category",
+          },
+        },
+        { $unwind: "$category" },
+        {
+          $lookup: {
+            from: "carts",
+            let: {
+              productId: "$_id",
+              userId: new mongoose.Types.ObjectId(req.user._id),
+            },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$product", "$$productId"] },
+                      { $eq: ["$user", "$$userId"] },
+                    ],
+                  },
+                },
+              },
+            ],
+            as: "totalDownloads",
+          },
+        },
+
+        {
+          $project: {
+            title: 1,
+            price: 1,
+            createdAt: 1,
+            "category.title": 1,
+            cart: { $arrayElemAt: ["$totalDownloads", 0] },
+          },
+        },
+      ]);
 
       const count = await ProductModel.countDocuments(filter);
 

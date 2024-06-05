@@ -23,8 +23,7 @@ export const verifyUser = async (req, res, next) => {
     const { userId } = await verifyToken(authorization.split(" ")[1]);
     let user = await UserModel.findById(userId).select("-createdAt -updatedAt");
 
-    if (!user || !user.isActive)
-      return validateResponse(res, AuthErrorObj, 403);
+    if (!user) return validateResponse(res, AuthErrorObj, 403);
 
     req.user = user;
 

@@ -1,16 +1,56 @@
 import { errorResponse, successResponse } from "../../helper/apiResponse.js";
+import { paginationDetails, paginationFun } from "../../helper/common.js";
 import CartModel from "./model.js";
 
 class controller {
   static get = async (req, res) => {
     try {
-      const result = await CartModel.find({ user: req.user._id });
+      const { skip, limit } = paginationFun(req.query);
+      const result = await CartModel.aggregate([
+        { $match: { user: req.user._id } },
+        {
+          $sort: { created: -1 },
+        },
+        {
+          $skip: skip, // set your skip value here
+        },
+        {
+          $limit: limit, // set your limit value here
+        },
+        {
+          $lookup: {
+            from: "products", // Name of the collection to join
+            localField: "product", // Field from the input documents
+            foreignField: "_id", // Field from the documents of the "from" collection
+            as: "product", // Output array field
+          },
+        },
+        {
+          $unwind: "$product", // Deconstructs the product array
+        },
+        {
+          $project: {
+            title: "$product.title",
+            price: "$product.price",
+            quantity: 1,
+          },
+        },
+      ]);
+
+      const count = await CartModel.countDocuments();
+
+      const pagination = paginationDetails({
+        limit: limit,
+        page: req.query.page,
+        totalItems: count,
+      });
 
       return successResponse({
         res,
         statusCode: 200,
         data: result,
         message: "Cart fetched successfully",
+        pagination,
       });
     } catch (error) {
       return errorResponse({
@@ -22,16 +62,38 @@ class controller {
   };
   static post = async (req, res) => {
     try {
-      const result = await CartModel.create({
-        product: req.body.product,
+      const doc = await CartModel.create({
+        product: req.params.id,
         user: req.user._id,
         quantity: 1,
       });
 
+      const result = await CartModel.aggregate([
+        { $match: { _id: doc._id } },
+        {
+          $lookup: {
+            from: "products", // Name of the collection to join
+            localField: "product", // Field from the input documents
+            foreignField: "_id", // Field from the documents of the "from" collection
+            as: "product", // Output array field
+          },
+        },
+        {
+          $unwind: "$product", // Deconstructs the product array
+        },
+        {
+          $project: {
+            title: "$product.title",
+            price: "$product.price",
+            quantity: 1,
+          },
+        },
+      ]);
+
       return successResponse({
         res,
         statusCode: 200,
-        data: result,
+        data: result[0],
         message: "Cart create successfully",
       });
     } catch (error) {
@@ -44,12 +106,12 @@ class controller {
   };
   static delete = async (req, res) => {
     try {
-      const result = await CartModel.findByIdAndDelete(req.params.id);
+      await CartModel.findByIdAndDelete(req.params.id);
 
       return successResponse({
         res,
         statusCode: 200,
-        data: result,
+        data: req.params.id,
         message: "Cart delete successfully",
       });
     } catch (error) {
