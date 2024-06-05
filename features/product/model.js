@@ -12,7 +12,7 @@ const mongooseSchema = mongoose.Schema(
       required: true,
     },
     price: {
-      type: String,
+      type: Number,
     },
   },
   { timestamps: true }

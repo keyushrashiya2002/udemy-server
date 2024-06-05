@@ -17,6 +17,7 @@ class controller {
           $lt: maxPrice,
         };
 
+      console.log(filter);
       const result = await ProductModel.find(filter)
         .skip(skip)
         .limit(limit)

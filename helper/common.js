@@ -1,5 +1,3 @@
-import moment from "moment";
-
 export const paginationFun = (data) => {
   const { page = 1, limit = 10 } = data;
 
@@ -15,18 +13,42 @@ export const paginationDetails = ({ page = 1, totalItems, limit }) => {
   return { page: Number(page), totalPages, totalItems, limit };
 };
 
-export const monthFilter = (query) => {
-  const { from, to } = query;
+export const getRandomNumber = (min, max) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+};
 
-  // Get current month's range
-  let fromDate = moment().startOf("month");
-  let toDate = moment().endOf("month").add(1, "day");
-
-  // If from and to are provided, use them
-  if (from && to) {
-    fromDate = moment(from);
-    toDate = moment(to).add(1, "day");
-  }
-
-  return { fromDate, toDate };
+export const getRandomTitle = () => {
+  const words = [
+    "Introduction",
+    "Advanced",
+    "Basics",
+    "Fundamentals",
+    "Mastering",
+    "Essentials",
+    "Concepts",
+    "Techniques",
+    "Principles",
+    "Applications",
+  ];
+  return `${words[getRandomNumber(0, words.length - 1)]} of ${
+    words[getRandomNumber(0, words.length - 1)]
+  }`;
+};
+export const createCategoryList = () => {
+  const title = [
+    "Development",
+    "Business",
+    "Finance & Accounting",
+    "IT & Software",
+    "Office Productivity",
+    "Personal Development",
+    "Design",
+    "Marketing",
+    "Lifestyle",
+    "Photography & Video",
+    "Health & Fitness",
+    "Music",
+    "Teaching & Academics",
+  ];
+  return title.map((title) => ({ title }));
 };

@@ -4,6 +4,7 @@ import morgan from "morgan";
 import cors from "cors";
 import { connectDb } from "./helper/connectDb.js";
 import { join } from "path";
+import * as route from "./router.js";
 
 // initialize server
 const app = express();
@@ -15,13 +16,17 @@ app.use(morgan("common"));
 
 // Handle Client Server
 var corsOptions = {
-  origin: CLIENT_URL,
+  origin: "*",
 };
 
 app.use(cors(corsOptions));
 
 // Connect to MongoDB
 connectDb(DATABASE_URL);
+
+// API Routes
+app.use(`/api/category`, route.categoryRoute);
+app.use(`/api/product`, route.productRoute);
 
 // Static
 app.use("/uploads", express.static(join(process.cwd(), "upload")));
